@@ -20,6 +20,7 @@
   "homepage": "https://github.com/savoryboi/employee-tracker#readme",
   "dependencies": {
     "inquirer": "^8.2.4",
+    "mysql2": "^2.3.3",
     "nodemon": "^2.0.19"
   }
 }
