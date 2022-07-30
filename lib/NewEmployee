@@ -1,0 +1,82 @@
+const db = require('../db/connection');
+const inquirer = require('inquirer');
+const cTable = require('console.table');
+
+
+const emp_prompts = [
+    {
+        name: 'first_name',
+        type: 'input',
+        message: 'Employee first name:'
+    },
+    {
+        name: 'last_name',
+        type: 'input',
+        message: 'Employee last name:'
+    },
+    {
+        name: 'role',
+        type: 'list',
+        message: 'Employee role:',
+        choices: ['Manager', 'Supervisor', 'Comm Lead', 'Salesperson']
+    },
+    {
+        name: 'manager',
+        type: 'list',
+        message: 'Manager (if applicable):',
+        choices: ['N/A']
+    },
+];
+
+function newEmployee() {
+    // update roles and insert into prompt array
+    db.query('SELECT * FROM roles', (err, data) => {
+        for (let i = 0; i < data.length; i++) {
+            emp_prompts[2].choices[i] = data[i].title;
+        }
+    })
+    // find managers from DB and insert into prompt array
+    db.query('SELECT first_name FROM employee where role_id = 1', (err, data) => {
+        data.forEach(item => {
+            emp_prompts[3].choices.push(item.first_name)
+        })
+    })
+    // prompt arrays updated w/ most current DB info, ready to prompt:
+    inquirer.prompt(emp_prompts)
+        .then(answers => {
+            console.log(`Now Adding ${answers.first_name} as a new ${answers.role}`);
+
+            let roleId;
+            let managerId;
+
+
+            db.query('SELECT * FROM roles', (err, data) => {
+                for (let i = 0; i < data.length; i++) {
+                    if (answers.role == data[i].title) {
+                        roleId = data[i].role_id;
+                    }
+                }
+
+                db.query(`INSERT INTO employee (first_name, last_name, role_id) VALUES ('${answers.first_name}', '${answers.last_name}', ${roleId})`)
+            });
+
+            db.query('SELECT * FROM employees', (err, data) => {
+                for (let i = 0; i < data.length; i++) {
+                    if (answers.manager == data[i].first_name) {
+                        managerId = data[i].id;
+                    } else {
+                        managerId = null;
+                    }
+                }
+
+                db.query(`INSERT INTO employee (manager_id) VALUES (${managerId})`, (err, data) => {
+                    if (err) return console.log(err)
+
+
+                });
+
+            })
+        })
+}
+
+module.exports = newEmployee;
