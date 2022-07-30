@@ -177,7 +177,7 @@ function newEmployee() {
                 roleId = 4;
             };
 
-            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager) VALUES ('${answers.first_name}', '${answers.last_name}', ${roleId}, '${answers.manager}')`);
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${answers.first_name}', '${answers.last_name}', ${roleId}, '${answers.manager}')`);
         }).then(() => {
             menu();
         })
